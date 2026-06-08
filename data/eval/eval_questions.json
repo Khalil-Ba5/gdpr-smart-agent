@@ -1,0 +1,22 @@
+[
+  {"question": "What is personal data?", "route": "vector", "expected_articles": [4]},
+  {"question": "What are the lawful bases for processing personal data?", "route": "vector", "expected_articles": [6]},
+  {"question": "What conditions must be met for consent to be valid?", "route": "vector", "expected_articles": [7]},
+  {"question": "What are the rules for a child's consent for online services?", "route": "vector", "expected_articles": [8]},
+  {"question": "What is the right of access by the data subject?", "route": "vector", "expected_articles": [15]},
+  {"question": "What is the right to erasure or right to be forgotten?", "route": "vector", "expected_articles": [17]},
+  {"question": "What is the right to data portability?", "route": "vector", "expected_articles": [20]},
+  {"question": "What is the right to object to processing?", "route": "vector", "expected_articles": [21]},
+  {"question": "What information must be provided to a data subject when data is collected?", "route": "vector", "expected_articles": [13]},
+  {"question": "What are the obligations of a processor?", "route": "vector", "expected_articles": [28]},
+  {"question": "When must a personal data breach be notified to the supervisory authority?", "route": "vector", "expected_articles": [33]},
+  {"question": "When must a data breach be communicated to the data subject?", "route": "vector", "expected_articles": [34]},
+  {"question": "What is a data protection impact assessment?", "route": "vector", "expected_articles": [35]},
+  {"question": "What are the tasks of the data protection officer?", "route": "vector", "expected_articles": [39]},
+  {"question": "What are the general principles for transfers of personal data to third countries?", "route": "vector", "expected_articles": [44]},
+
+  {"question": "Which articles reference Article 6?", "route": "graph", "expected_articles": []},
+  {"question": "What is related to Article 17?", "route": "graph", "expected_articles": []},
+  {"question": "What other articles are connected to Article 9?", "route": "graph", "expected_articles": []},
+  {"question": "How does Article 13 relate to other provisions?", "route": "graph", "expected_articles": []}
+]

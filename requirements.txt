@@ -1,0 +1,36 @@
+# GDPR Smart Agent — direct dependencies (Python 3.11)
+# Versions pinned to match the existing venv.
+
+# --- LLM / orchestration ---
+langchain==1.2.15
+langchain-core==1.2.26
+langchain-openai==1.1.12
+langchain-anthropic==1.4.0
+langchain-text-splitters==1.1.1
+langgraph==1.1.6
+
+# --- Vector store ---
+langchain-chroma==1.1.0
+chromadb==1.5.6
+
+# --- Graph store (used by the graph-RAG layer) ---
+neo4j==6.1.0
+
+# --- API ---
+fastapi==0.135.3
+uvicorn==0.44.0
+
+# --- MCP server ---
+mcp==1.27.0
+
+# --- Scraping / ingest ---
+requests==2.33.1
+beautifulsoup4==4.14.3
+
+# --- Config ---
+python-dotenv==1.2.2
+pydantic==2.12.5
+pydantic-settings==2.13.1
+
+# --- Dev / testing ---
+pytest==9.0.3

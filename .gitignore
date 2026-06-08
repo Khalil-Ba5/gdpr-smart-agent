@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual environment
+venv/
+.venv/
+
+# Secrets / config
+.env
+
+# Vector store (rebuildable via src/rag/ingest.py)
+chroma_db/
+chroma_data/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
