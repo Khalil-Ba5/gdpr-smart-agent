@@ -111,7 +111,8 @@ read-only into the container.
 ## Tests & evaluation
 
 ```bash
-python -m pytest          # unit tests — network-free (LLM, Chroma, Neo4j mocked)
-python -m scripts.evaluate  # retrieval quality + router accuracy on a labelled set
+python -m pytest            # unit tests — network-free (LLM, Chroma, Neo4j mocked)
+python -m scripts.evaluate  # retrieval quality + router accuracy (embeddings only)
+python -m scripts.judge     # LLM-as-judge faithfulness on a sample (calls the LLM)
 ```
 See [docs/evaluation-results.md](docs/evaluation-results.md) for current scores.
