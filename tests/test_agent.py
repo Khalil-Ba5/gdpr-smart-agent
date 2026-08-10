@@ -1,5 +1,7 @@
 """Tests for the agent nodes and compiled graph (LLM + retrieval mocked)."""
 
+from neo4j.exceptions import ServiceUnavailable
+
 from src.agent import nodes
 from src.agent.graph import answer_question
 from src.rag.vector_retriever import RetrievedChunk
@@ -42,6 +44,31 @@ def test_retrieve_node_honours_explicit_k(monkeypatch):
     monkeypatch.setattr(nodes, "retrieve", lambda q, k: captured.update(k=k) or [])
     nodes.retrieve_node({"question": "Q", "k": 9})
     assert captured["k"] == 9
+
+
+# --- graph_retrieve_node ----------------------------------------------------
+
+def test_graph_retrieve_node_falls_back_on_empty_result(monkeypatch):
+    monkeypatch.setattr(nodes.graph_retriever, "retrieve", lambda q, limit: [])
+    monkeypatch.setattr(nodes, "retrieve", lambda q, k: [_chunk()])
+
+    out = nodes.graph_retrieve_node({"question": "Which articles reference Article 6?", "k": 4})
+
+    assert [c.citation for c in out["chunks"]] == ["Art. 6(1)"]
+
+
+def test_graph_retrieve_node_falls_back_when_neo4j_unreachable(monkeypatch):
+    """A connectivity failure (Neo4j down) must degrade to vector search, not raise."""
+
+    def _raise(question, limit):
+        raise ServiceUnavailable("connection refused")
+
+    monkeypatch.setattr(nodes.graph_retriever, "retrieve", _raise)
+    monkeypatch.setattr(nodes, "retrieve", lambda q, k: [_chunk()])
+
+    out = nodes.graph_retrieve_node({"question": "Which articles reference Article 6?", "k": 4})
+
+    assert [c.citation for c in out["chunks"]] == ["Art. 6(1)"]
 
 
 # --- generate_node ---------------------------------------------------------

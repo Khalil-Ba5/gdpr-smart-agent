@@ -1,8 +1,12 @@
 import json
+import time
 from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+
+# Delay between requests so a 99-page run doesn't hammer gdpr-info.eu.
+REQUEST_DELAY_SECONDS = 0.5
 
 # Map article number ranges to GDPR chapter titles.
 CHAPTERS = {
@@ -124,6 +128,13 @@ def scrape_articles(n):
         for i in range(1, n + 1):
             try:
                 article = scrape_article(i, session)
+                if not article["paragraphs"] or not article["title"]:
+                    # The site's markup changed or the page didn't load as
+                    # expected — the selectors in scrape_article() found
+                    # nothing rather than erroring, so catch it here instead
+                    # of silently writing an empty article to the output.
+                    print(f"WARNING: article {i} scraped with no title/paragraphs — "
+                          f"selectors may be stale, check {article['url']}")
                 articles.append(article)
                 print(f"Scraped article {i}")
             except requests.RequestException as e:
@@ -133,6 +144,8 @@ def scrape_articles(n):
             except Exception as e:
                 # Catch unexpected parsing or logic errors as well.
                 print(f"Unexpected error on article {i}: {e}")
+            finally:
+                time.sleep(REQUEST_DELAY_SECONDS)
 
     # Ensure the output directory exists before writing the file.
     output_dir = Path("data/docs")
