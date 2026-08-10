@@ -10,12 +10,16 @@ Interactive docs are then served at http://127.0.0.1:8000/docs
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from src.agent.graph import answer_question, get_graph
+
+logger = logging.getLogger(__name__)
 
 
 class AskRequest(BaseModel):
@@ -34,6 +38,7 @@ class Source(BaseModel):
 class AskResponse(BaseModel):
     answer: str
     sources: list[Source]
+    route: str | None = None
 
 
 @asynccontextmanager
@@ -49,6 +54,16 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Return a clean 500 instead of leaking a stack trace to the client.
+
+    The full exception is still logged server-side for debugging.
+    """
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "Internal server error."})
 
 
 @app.get("/health")
@@ -71,4 +86,4 @@ def ask(request: AskRequest) -> AskResponse:
         )
         for chunk in result.get("chunks", [])
     ]
-    return AskResponse(answer=result["answer"], sources=sources)
+    return AskResponse(answer=result["answer"], sources=sources, route=result.get("route"))

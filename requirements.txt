@@ -23,6 +23,9 @@ uvicorn==0.44.0
 # --- MCP server ---
 mcp==1.27.0
 
+# --- Frontend ---
+streamlit==1.56.0
+
 # --- Scraping / ingest ---
 requests==2.33.1
 beautifulsoup4==4.14.3
@@ -30,7 +33,6 @@ beautifulsoup4==4.14.3
 # --- Config ---
 python-dotenv==1.2.2
 pydantic==2.12.5
-pydantic-settings==2.13.1
 
 # --- Dev / testing ---
 pytest==9.0.3
