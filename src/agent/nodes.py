@@ -2,20 +2,24 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
+from neo4j.exceptions import GqlError  # common base for Neo4jError (server) + DriverError (connectivity)
 
 from src.agent.state import AgentState
 from src.rag import graph_retriever
 from src.rag.vector_retriever import RetrievedChunk, retrieve
 
+logger = logging.getLogger(__name__)
+
 # Default to OpenAI to match the existing .env / ingest setup. Swap to Claude by
 # setting LLM_PROVIDER=anthropic (and ANTHROPIC_API_KEY) — see _get_llm below.
 DEFAULT_OPENAI_MODEL = "gpt-4o"
-DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-6"
+DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5"
 DEFAULT_TOP_K = 4
 
 # Words that signal a *relationship* question better served by the graph.
@@ -102,10 +106,16 @@ def graph_retrieve_node(state: AgentState) -> AgentState:
     """Graph retrieval: expand to articles related to those named in the question.
 
     Falls back to vector retrieval if the graph yields nothing (e.g. the
-    referenced article has no recorded neighbours).
+    referenced article has no recorded neighbours) *or* if the graph itself is
+    unreachable (Neo4j down/misconfigured) — a connectivity failure should
+    degrade the answer, not crash the request.
     """
     k = state.get("k") or DEFAULT_TOP_K
-    chunks = graph_retriever.retrieve(state["question"], limit=k)
+    try:
+        chunks = graph_retriever.retrieve(state["question"], limit=k)
+    except GqlError:
+        logger.warning("Graph retrieval failed; falling back to vector search.", exc_info=True)
+        chunks = []
     if not chunks:
         chunks = retrieve(state["question"], k=k)
     return {"chunks": chunks}

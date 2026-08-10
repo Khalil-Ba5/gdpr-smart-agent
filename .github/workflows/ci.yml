@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Fully network-free: LLM, Chroma and Neo4j are mocked, so this needs no
+      # API keys or running services. See docs/architecture.md#testing.
+      - name: Run test suite
+        run: python -m pytest
+
+      # scripts/evaluate.py and scripts/judge.py are intentionally NOT run
+      # here: evaluate.py needs a built chroma_db/ index (gitignored, not
+      # reproducible from a clean checkout without OPENAI_API_KEY) and both
+      # scripts spend real OpenAI quota. Run them locally — see
+      # docs/evaluation-results.md.

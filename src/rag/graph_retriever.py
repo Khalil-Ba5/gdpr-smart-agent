@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 
-from src.graph.schema import get_driver
+from src.graph.schema import get_cached_driver
 from src.rag.vector_retriever import RetrievedChunk
 
 # "Article 6", "Art. 17", "article 6(1)" -> 6 / 17 / 6
@@ -56,18 +56,18 @@ def _record_to_chunk(rec: dict) -> RetrievedChunk:
 
 
 def retrieve_related(numbers: list[int], limit: int = 6, driver=None) -> list[RetrievedChunk]:
-    """Return articles related to the given anchor ``numbers``."""
+    """Return articles related to the given anchor ``numbers``.
+
+    Uses the shared, process-wide cached driver by default (see
+    ``src.graph.schema.get_cached_driver``) — pass ``driver`` explicitly (as
+    the tests do) to use a different one instead.
+    """
     if not numbers:
         return []
 
-    own_driver = driver is None
-    driver = driver or get_driver()
-    try:
-        with driver.session() as session:
-            records = session.run(_NEIGHBOURS, numbers=numbers, limit=limit).data()
-    finally:
-        if own_driver:
-            driver.close()
+    driver = driver or get_cached_driver()
+    with driver.session() as session:
+        records = session.run(_NEIGHBOURS, numbers=numbers, limit=limit).data()
 
     return [_record_to_chunk(rec) for rec in records]
 

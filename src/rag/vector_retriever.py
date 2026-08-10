@@ -9,6 +9,7 @@ most relevant chunks together with their citation metadata.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
@@ -57,8 +58,13 @@ class RetrievedChunk:
         )
 
 
+@lru_cache(maxsize=1)
 def get_vectorstore() -> Chroma:
-    """Open the persisted Chroma collection (read-only use)."""
+    """Open the persisted Chroma collection (read-only use).
+
+    Cached per process — reopening the embeddings client + SQLite-backed store
+    on every call is wasted I/O once this is called per-request (API/MCP).
+    """
     embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
     return Chroma(
         collection_name=COLLECTION_NAME,

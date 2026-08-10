@@ -1,16 +1,16 @@
 import json
-import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-# Make sure your OpenAI key is set:
-# export OPENAI_API_KEY="..."
-# or on Windows:
-# set OPENAI_API_KEY=...
+# Loads OPENAI_API_KEY (and friends) from .env — every other entry point does
+# this; running `python -m src.rag.ingest` directly (as the README documents)
+# previously depended on OPENAI_API_KEY already being exported in the shell.
+load_dotenv()
 
 JSON_PATH = "data/docs/gdpr_articles.json"
 PERSIST_DIR = "./chroma_db"
@@ -40,7 +40,7 @@ def load_gdpr_documents(json_path: str) -> list[Document]:
                         "paragraph_number": paragraph["number"],
                         "title": title,
                         "chapter": chapter,
-                        "recitals": ",".join(str(r) for r in article["recitals"]),
+                        "recitals": ",".join(str(r) for r in recitals),
                         "url": url,
                     },
                 )
